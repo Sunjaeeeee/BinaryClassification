@@ -3,38 +3,54 @@
 
 import warnings
 warnings.filterwarnings('ignore')
-# import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from sklearn.preprocessing import LabelEncoder, OneHotEncoder, StandardScaler
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn.model_selection import GridSearchCV, StratifiedKFold, StratifiedShuffleSplit
+from sklearn.model_selection import GridSearchCV, StratifiedShuffleSplit
 
 from sklearn.linear_model import LogisticRegression
-# from sklearn.neighbors import KNeighborsClassifier
-# from sklearn.naive_bayes import GaussianNB
-# from sklearn.svm import SVC
-# from sklearn.tree import DecisionTreeClassifier
-# from sklearn.ensemble import RandomForestClassifier
 
 
-from sklearn.metrics import  confusion_matrix
-# from sklearn.metrics import mean_absolute_error, accuracy_score, classification_report
+from sklearn.metrics import  confusion_matrix, accuracy_score, classification_report
 
-df = pd.read_csv("data/adult_data.csv")
+df = pd.read_csv("./data/adult_data.csv")
+print('Dataframe shape: ', df.shape)
+print(df.isnull().sum())
 df.head()
 
-# TODO: Handle missing data
-print(df.isnull().sum())
+# Data Cleanup
+
 df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
 df = df.dropna(how='any',axis=0)
-print(df.isnull().sum())
 
-# TODO: Visualize
+print('Dataframe shape: ', df.shape)
+print(df.isnull().sum())
+df.head()
+
+# Visualize
 import seaborn as sns
-sns.boxplot(x='age',data=df,hue='income',y='capital-gain', palette=sns.xkcd_palette(["pastel purple", "pastel yellow"]))
+
+    # Visualizing amount of each income status
+sns.set_theme(style="darkgrid")
+ax = sns.countplot(x="income", data=df, palette=sns.xkcd_palette(["azure", "light red"]))
+plt.xlabel('Income')
+plt.ylabel('Count')
+# plt.savefig('./plots/income_count.png')
+plt.show()
+
+    # Visualizing distribution for income vs age
+fig=plt.figure(figsize=(8,4))
+for x in ['<=50K','>50K']:
+    df['age'][df['income']==x].plot(kind='kde')
+    
+plt.title('Income vs Age Density Distribution')
+plt.legend(('<=50K','>50K'))
+plt.xlabel('Age')
+# plt.savefig('./plots/income_vs_age.png')
+plt.show()
 
 
 # Label Encoding categorical features
@@ -56,8 +72,8 @@ df['hours-per-week'] = le.fit_transform(df['hours-per-week'])
 df['native-country'] = le.fit_transform(df['native-country'])
 
 df['income'] = le.fit_transform(df['income'])
-# Correlation Heatmap
 
+# Correlation Heatmap
 fig, ax = plt.subplots(figsize=(15,10))
 sns.heatmap(df.corr(), annot = True, ax=ax)
 plt.show()
@@ -122,6 +138,14 @@ print('Best Estimator:', grid.best_estimator_)
 
 knn_grid= grid.best_estimator_
 y_pred = knn_grid.predict(X_test)
+
 # Confusion matrix
 
-pd.DataFrame(confusion_matrix(y_test,y_pred), columns=["Predicted P", "Predicted N"], index=["Actual P","Actual N"] )
+confusion_matrix = pd.DataFrame(confusion_matrix(y_test,y_pred), columns=["Predicted P", "Predicted N"], index=["Actual P","Actual N"] )
+print(confusion_matrix)
+
+# Calculating metrics
+
+logreg_grid_score = accuracy_score(y_test, y_pred)
+print('Model Accuracy:', logreg_grid_score)
+print('Classification Report:\n', classification_report(y_test, y_pred))
