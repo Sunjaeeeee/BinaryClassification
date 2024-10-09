@@ -26,7 +26,7 @@ The dataset used in this script is `adult_data.csv`. It contains demographic inf
 1. **Import Libraries**: Essential libraries are imported for data manipulation, visualization, and machine learning.
 2. **Load Data**: The dataset is read into a pandas DataFrame using the following command:
     ```python
-    df = pd.read_csv("data/adult_data.csv")
+    df = pd.read_csv("./data/adult_data.csv")
     ```
 3. **Data Cleanup**:
     * Missing data is identified and handled by dropping rows with any missing values:
